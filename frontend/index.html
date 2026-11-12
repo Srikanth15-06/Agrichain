@@ -123,8 +123,13 @@
         fetchWeatherByLocation(lat, lon);
       },
       (error) => {
-        weatherElement.innerText = "Location access denied.";
-      }
+        weatherElement.innerText = error.code === 1
+          ? "Location access denied. Allow precise location for this site."
+          : error.code === 3
+            ? "Location request timed out. Try again with device location enabled."
+            : "Current location unavailable.";
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   } else {
     weatherElement.innerText = "Geolocation not supported.";
