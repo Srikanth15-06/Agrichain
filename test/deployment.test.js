@@ -37,3 +37,40 @@ test('returns a clear API 404 and validates weather coordinates', async () => {
   const invalidCoordinates = await fetch(`${baseUrl()}/api/weather/current?lat=100&lon=0`);
   assert.equal(invalidCoordinates.status, 400);
 });
+
+test('maps OpenWeatherMap data to the frontend weather response', async () => {
+  const previousKey = process.env.WEATHER_API_KEY;
+  const originalFetch = global.fetch;
+  process.env.WEATHER_API_KEY = 'test-weather-key';
+  let requestedUrl;
+
+  global.fetch = async (url, options) => {
+    if (String(url).startsWith('https://api.openweathermap.org/')) {
+      requestedUrl = new URL(url);
+      return new Response(JSON.stringify({
+        name: 'Hyderabad',
+        main: { temp: 30.1 },
+        weather: [{ description: 'haze' }]
+      }), { status: 200 });
+    }
+    return originalFetch(url, options);
+  };
+
+  try {
+    const response = await fetch(`${baseUrl()}/api/weather/current?lat=17.3753&lon=78.4744`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), {
+      location: { name: 'Hyderabad' },
+      current: { temp_c: 30.1, condition: { text: 'haze' } }
+    });
+    assert.equal(requestedUrl.hostname, 'api.openweathermap.org');
+    assert.equal(requestedUrl.searchParams.get('lat'), '17.3753');
+    assert.equal(requestedUrl.searchParams.get('lon'), '78.4744');
+    assert.equal(requestedUrl.searchParams.get('units'), 'metric');
+    assert.equal(requestedUrl.searchParams.get('appid'), 'test-weather-key');
+  } finally {
+    global.fetch = originalFetch;
+    if (previousKey === undefined) delete process.env.WEATHER_API_KEY;
+    else process.env.WEATHER_API_KEY = previousKey;
+  }
+});

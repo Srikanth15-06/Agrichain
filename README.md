@@ -46,7 +46,7 @@ be deployed as one Render web service.
 5. Deploy. Render uses `npm ci`, `npm start`, and `/readyz` to verify that the
    service and database are ready.
 6. Add optional environment variables in Render only for services you enable:
-   `WEATHER_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and the
+   `WEATHER_API_KEY` (OpenWeatherMap), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and the
    `SMTP_*` settings. Configure the Stripe webhook URL as
    `https://<your-render-host>/api/payment/webhook`.
 
@@ -68,10 +68,9 @@ should not be treated as permanent records.
 - **Image storage:** Cloudinary credentials are required for new produce image
   uploads. The app validates uploads, stores them in the `agrichain/produce`
   folder, and saves the secure URL and public ID in MongoDB.
-- **Weather:** set `WEATHER_API_KEY`. Weather requests are proxied by the
-  backend; never put the provider key in frontend code. A key was previously
-  embedded in client-side pages, so rotate or revoke it in the provider
-  dashboard before production.
+- **Weather:** set `WEATHER_API_KEY` to an OpenWeatherMap API key. Weather
+  requests are proxied by the backend; never put the provider key in frontend
+  code. Rotate any key previously exposed in client code or shared publicly.
 - **Stripe:** set both Stripe keys and configure the webhook endpoint above.
   Payment routes return a clear service-unavailable response until configured.
 - **Password reset email:** set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,

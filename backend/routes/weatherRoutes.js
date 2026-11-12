@@ -45,11 +45,13 @@ router.get('/current', async (req, res) => {
 
   try {
     const query = new URLSearchParams({
-      key: apiKey,
-      q: `${latitude},${longitude}`
+      lat: String(latitude),
+      lon: String(longitude),
+      appid: apiKey,
+      units: 'metric'
     });
     const response = await fetch(
-      `https://api.weatherapi.com/v1/current.json?${query}`,
+      `https://api.openweathermap.org/data/2.5/weather?${query}`,
       { signal: AbortSignal.timeout(8000) }
     );
     if (!response.ok) {
@@ -59,19 +61,19 @@ router.get('/current', async (req, res) => {
 
     const weather = await response.json();
     if (
-      !weather.location?.name ||
-      !Number.isFinite(Number(weather.current?.temp_c)) ||
-      !weather.current?.condition?.text
+      !weather.name ||
+      !Number.isFinite(Number(weather.main?.temp)) ||
+      !weather.weather?.[0]?.description
     ) {
       return res.status(502).json({ message: 'Weather provider returned an invalid response' });
     }
 
     res.set('Cache-Control', 'private, max-age=300');
     return res.json({
-      location: { name: weather.location.name },
+      location: { name: weather.name },
       current: {
-        temp_c: weather.current.temp_c,
-        condition: { text: weather.current.condition.text }
+        temp_c: weather.main.temp,
+        condition: { text: weather.weather[0].description }
       }
     });
   } catch (error) {
