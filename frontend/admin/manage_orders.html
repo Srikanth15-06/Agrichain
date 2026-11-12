@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AgriChain | Home</title>
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+
+        section {
+        padding: 180px 0px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height:80vh;
+        button{
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            margin: 50px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            max-width: 20vw;
+            width: 15vw
+        }
+        }
+        .lang-toggle {
+        margin-top: 10px;
+        }
+            table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        }
+        th {
+        background-color: #f2f2f2;
+        }
+        tr:hover {
+        background-color: #f1f1f1;
+        }
+        .ordersContainer {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        flex: 1;
+        min-width: 200px;
+        height:7vh;
+        margin:5px;
+        padding:2px;
+        }
+        .dashboard {
+        padding: 20px 0px 0px 0px;
+        margin: 220px 0px 0px 0px ;
+        background: rgba(218, 239, 214, 0.5);
+        border-radius: 8px;
+        height: 70vh;
+        width: 80%;
+        box-shadow: 0 2px 5px rgba(218, 239, 214, 0.9);
+        /* position: relative; */
+        overflow: scroll;
+        
+
+
+        }
+        nav {
+        margin:50px 0px 0px 0px;
+        }
+        section h2 {
+        font-size: 30px;
+        color: #2d572c;
+        padding: 20px;
+        }
+
+        section p {
+        font-size: 18px;
+        color: #555;
+        }
+
+        a{
+        text-decoration: none;
+        color: #2d572c;
+        border: 2px solid #2d572c;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+        margin: 10px;
+        font-size: 14px;
+        font-weight: bold;
+        max-width: 15px;
+        }
+
+        section button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        margin: 50px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        }
+
+        .back {
+        width: 100%;
+        height: 100vh;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        }
+
+        #notifications {
+        /* background: #fff3cd; */
+        padding: 50px 0px 0px 0px;
+        border-radius: 5px;
+        margin-top: 20px;
+        }
+            .back-btn {
+        margin-top: 20px;
+        background: #2d572c;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        }
+        .card{
+            background-color: #4CAF50;
+            height:5vh;
+            width: 50vh;
+        }
+    </style>
+<script src="/api-config.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="navbar">
+            <img src="../assets/images/ac_logo.png" alt="agrichian logo" class="logo">
+        <h1>Welcome, <span id="userName"></span></h1>
+        <nav>
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <button class="back-btn" onclick="logout()">← Logout</button>
+        </nav>
+        </div>
+    </header>
+
+    <section>
+        <img src="../assets/images/image.png" alt="AgriChain Logo" class="back" />
+        <div class="dashboard">
+            <div id="ordersContainer"></div>
+            <button class="back-btn" onclick="goBack()">← Back</button>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 AgriChain. All rights reserved.</p>
+    </footer>
+
+        <script>
+        const token = localStorage.getItem("token");
+        const ordersContainer = document.getElementById("ordersContainer");
+
+        fetch(`${window.API_BASE_URL}/api/user/profile`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Failed to load profile");
+            return res.json();
+        })
+        .then(profile => {
+            document.getElementById("userName").textContent = profile.name || "";
+        })
+        .catch(err => console.error("Error loading profile:", err));
+
+        fetch(`${window.API_BASE_URL}/api/admin/orders`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+        })
+        .then(res => res.json())
+        .then(data => {
+        if (!Array.isArray(data) || data.length === 0) {
+            ordersContainer.innerHTML = "<p>No orders available.</p>";
+            return;
+        }
+
+        data.forEach(order => {
+            const card = document.createElement("div");
+            card.className = "order-card";
+            const produce = order.produce || {};
+
+            card.innerHTML = `
+            <h3>🧺 ${produce.title || 'Unknown Produce'}</h3>
+            <p><strong>Quantity:</strong> ${order.quantity}</p>
+            <p><strong>Buyer:</strong> ${order.buyer?.name || 'Unknown'} (${order.buyer?.email})</p>
+            <p><strong>Status:</strong> ${order.status}</p>
+            <button onclick="updateStatus('${order._id}', 'accepted')">Approve</button>
+            <button onclick="updateStatus('${order._id}', 'rejected')">Reject</button>
+            `;
+            ordersContainer.appendChild(card);
+        });
+        })
+        .catch(err => {
+        console.error(err);
+        ordersContainer.innerHTML = "<p>Failed to load orders.</p>";
+        });
+
+        function updateStatus(orderId, status) {
+        fetch(`${window.API_BASE_URL}/api/admin/order/${orderId}`, {
+            method: "PUT",
+            headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch(err => {
+            console.error("Error updating order:", err);
+            alert("Failed to update order status.");
+        });
+        }
+    </script>
+
+        <!-- <script>
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+
+        if (!token || role !== "admin") {
+        window.location.href = "../login.html";
+        }
+
+        function goBack() {
+        window.location.href = "admin_dashboard.html";
+        }
+
+        fetch(`${window.API_BASE_URL}/api/admin/users`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector("#userTable tbody");
+
+            if (!data || data.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>No users found.</td></tr>";
+            return;
+            }
+
+            data.forEach(user => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.phone}</td>
+                <td>${user.role}</td>
+                <td>${user.isVerified ? "✅" : "❌"}</td>
+            `;
+            tbody.appendChild(row);
+            });
+        })
+        .catch(err => {
+            console.error("Error loading users:", err);
+            document.querySelector("#userTable tbody").innerHTML = "<tr><td colspan='5'>Error loading users.</td></tr>";
+        });
+    </script> -->
+    
+</body>
+</html>

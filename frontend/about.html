@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Dashboard | AgriChain</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5fff5;
+      margin: 0;
+    }
+    header {
+      background-color: #4CAF50;
+      padding: 15px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .dashboard {
+      padding: 40px;
+      text-align: center;
+    }
+    .dashboard h2 {
+      color: #2d572c;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      margin: 15px;
+      font-size: 16px;
+      border: none;
+      background-color: #2d572c;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #45a049;
+    }
+    .lang-toggle {
+      float: right;
+      margin-right: 20px;
+    }
+    .weather {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+<script src="/api-config.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>👨‍🌾 AgriChain | Buyer Dashboard</h1>
+  <nav>
+    <a href="buyers/view_produce.html">Marketplace</a>
+    <a href="buyers/cart.html">Cart</a>
+    <a href="buyers/orders.html">Orders</a>
+    <a href="buyers/profile.html">Profile</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+</header>
+
+<div class="dashboard">
+  <h2>Welcome, <span id="buyerName">Buyer</span>! 👋</h2>
+
+  <div>
+    <button class="btn" onclick="location.href='buyers/view_produce.html'">Explore Marketplace</button><br>
+    <button class="btn" onclick="location.href='buyers/cart.html'">Go to Cart</button><br>
+    <button class="btn" onclick="location.href='buyers/orders.html'">View Orders</button><br>
+    <button class="btn" onclick="location.href='buyers/profile.html'">Your Profile</button><br>
+  </div>
+
+  <div class="weather" id="weatherInfo">🌦️ Loading weather...</div>
+</div>
+
+<script>
+  // Check token
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "login.html";
+  }
+
+  // Get user info using token
+  fetch(`${window.API_BASE_URL}/api/user/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("buyerName").textContent = data.name || "Buyer";
+  })
+  .catch(err => {
+    console.error("Error fetching profile:", err);
+    window.location.href = "login.html";
+  });
+
+  // Logout
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+  }
+
+  // Weather (optional - dummy)
+  document.getElementById("weatherInfo").textContent = "🌤️ Weather: 30°C, Clear Skies";
+</script>
+
+</body>
+</html>

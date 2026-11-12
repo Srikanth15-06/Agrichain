@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profile | AgriChain</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f5f9;
+      margin: 0;
+    }
+
+    header {
+      background-color: #2d572c;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #2d572c;
+    }
+
+    .info {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .info label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .btn {
+      background-color: #2d572c;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #256b2d;
+    }
+
+    #messageBox {
+      margin-top: 1rem;
+      color: red;
+    }
+  </style>
+<script src="/api-config.js"></script>
+</head>
+<body>
+  <header>
+    <h1>User Profile</h1>
+  </header>
+
+  <div class="container">
+    <h2>My Profile</h2>
+    <div class="info"><label>Name:</label> <span id="userName">Loading...</span></div>
+    <div class="info"><label>Email:</label> <span id="userEmail">Loading...</span></div>
+    <div class="info"><label>Phone:</label> <span id="userPhone">Loading...</span></div>
+    <div class="info"><label>Role:</label> <span id="userRole">Loading...</span></div>
+
+    <button class="btn" onclick="logout()">Logout</button>
+    <div id="messageBox"></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+      sessionStorage.setItem("message", "Please login first.");
+      window.location.href = "../login.html";
+    }
+
+    fetch(`${window.API_BASE_URL}/api/user/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.name) {
+        document.getElementById("userName").textContent = data.name;
+        document.getElementById("userEmail").textContent = data.email;
+        document.getElementById("userPhone").textContent = data.phone;
+        document.getElementById("userRole").textContent = data.role;
+      } else {
+        document.getElementById("messageBox").innerText = "Failed to load profile.";
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("messageBox").innerText = "Error fetching profile.";
+    });
+
+    function logout() {
+      localStorage.clear();
+      sessionStorage.setItem("message", "You have been logged out.");
+      window.location.href = "../login.html";
+    }
+  </script>
+</body>
+</html>

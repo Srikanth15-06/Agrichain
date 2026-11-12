@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment Success | AgriChain</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e8ffe8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      color: #2d572c;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    #invoiceButton {
+      display: none;
+      background-color: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    #invoiceButton:hover {
+      background-color: #218838;
+    }
+  </style>
+<script src="/api-config.js"></script>
+</head>
+<body>
+
+  <h1>✅ Payment Successful!</h1>
+  <p>Thank you for your purchase. Your order has been placed.</p>
+  <p id="invoiceMessage" role="status"></p>
+
+  <button id="invoiceButton" type="button">📄 Download Invoice</button>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const sessionId = new URLSearchParams(window.location.search).get("session_id");
+    const button = document.getElementById("invoiceButton");
+    const message = document.getElementById("invoiceMessage");
+
+    button.addEventListener("click", async () => {
+      if (!token || !sessionId) {
+        message.textContent = "Sign in again or return from the payment confirmation link to download your invoice.";
+        return;
+      }
+
+      button.disabled = true;
+      message.textContent = "Preparing your invoice...";
+      try {
+        const response = await fetch(
+          `${window.API_BASE_URL}/api/payment/invoice/${encodeURIComponent(sessionId)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!response.ok) {
+          let errorMessage = "Invoice is not ready yet. Please try again shortly.";
+          try {
+            const error = await response.json();
+            errorMessage = error.message || errorMessage;
+          } catch (_) {}
+          throw new Error(errorMessage);
+        }
+
+        const invoice = await response.blob();
+        const downloadUrl = URL.createObjectURL(invoice);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "agrichain-invoice.pdf";
+        link.click();
+        URL.revokeObjectURL(downloadUrl);
+        localStorage.removeItem("cart");
+        message.textContent = "Invoice downloaded. Your cart has been cleared.";
+      } catch (error) {
+        message.textContent = error.message || "Could not download the invoice.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

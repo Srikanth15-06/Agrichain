@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgriChain | Home</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+
+    section {
+      background-image: url("../assets/images/image.png");
+      background-size: cover;
+      background-position: center;
+      padding: 180px 0px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* position: fixed;
+      scrollbar-width: thin;
+      scroll-behavior: auto; */
+      button{
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        margin: 50px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        max-width: 20vw;
+        width: 15vw
+      }
+    }
+
+    .dashboard {
+      padding: 20px;
+      background: rgba(218, 239, 214, 0.5);
+      border-radius: 8px;
+      height: 70vh;
+      width: 80%;
+      box-shadow: 0 2px 5px rgba(218, 239, 214, 0.9);
+      /* position: relative; */
+      scrollbar-width: thin;
+      /* margin:520px 0px 0px 0px;
+      padding: 140px 0px 0px 0px;;
+      position: fixed;
+      scroll-behavior: auto; */
+    }
+
+    section h2 {
+      font-size: 30px;
+      color: #2d572c;
+      padding: 20px;
+    }
+
+    section p {
+      font-size: 18px;
+      color: #555;
+    }
+
+    a{
+      text-decoration: none;
+      color: #2d572c;
+      border: 2px solid #2d572c;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+      margin: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      max-width: 15px;
+    }
+
+    section button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      margin: 50px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .back {
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    p{
+      padding:5px;
+    }
+  </style>
+<script src="/api-config.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="navbar">
+        <img src="../assets/images/ac_logo.png" alt="agrichian logo" class="logo">
+      <h1>Welcome, <span id="userName"></span></h1>
+      <nav>
+      <a href="#" onclick="logout()">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <section>
+    <img src="../assets/images/image.png" alt="AgriChain Logo" class="back" />
+    <div class="dashboard">
+          <h2>👤 My Profile</h2>
+    <div class="info" id="profileDetails">
+      <p>Loading profile...</p>
+    </div>
+    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+
+    <!-- <h1 data-key="welcome">Welcome <span id="userName">Farmer</span></h1>
+    <button class="btn" data-key="postProduce">➕ Post Produce</button> -->
+
+  </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 AgriChain. All rights reserved.</p>
+  </footer>
+
+ <script>
+    //User Login and Token Storage
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    console.log(token,role);
+
+    //If no token is found, the user is redirected to the login page (not authenticated)
+    if (!token) {
+      window.location.href = "../login.html";
+    }
+
+    fetch(`${window.API_BASE_URL}/api/user/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        console.log("RAW RES:", res);
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Profile data:", data);
+        const profileDiv = document.getElementById("profileDetails");
+        console.log(profileDiv)
+        const user = data;
+        console.log(user);
+        profileDiv.innerHTML = `
+          <p><strong>Name:</strong> ${user.name}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Phone:</strong> ${user.phone}</p>
+          <p><strong>Role:</strong> ${user.role}</p>
+          <p><strong>Joined On:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
+        `;
+      })
+      .catch((err) => {
+        document.getElementById("profileDetails").innerHTML = `<p>Error loading profile.</p>`;
+        console.error(err);
+      });
+  
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      sessionStorage.setItem("message", "You have been logged out.");
+      window.location.href = "../index.html";
+    }
+  </script>
+
+<!-- <script>
+  const token = localStorage.getItem('token'); // ✅ Ensure this is set
+
+  fetch(`${window.API_BASE_URL}/api/auth/profile`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Profile data:", data); // 🐞 Check this
+
+      // ✅ Example: Render it on the page
+      document.getElementById("profile-name").innerText = data.name;
+      document.getElementById("profile-email").innerText = data.email;
+      document.getElementById("profile-role").innerText = data.role;
+    })
+    .catch(err => {
+      console.error("Error fetching profile:", err);
+    });
+</script> -->
+
+
+</body>
+</html>

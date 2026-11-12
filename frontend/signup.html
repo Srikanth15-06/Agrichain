@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Farmer | Welcome</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    section {
+      padding: calc(15vh + 24px) 16px 90px;
+      text-align: center;
+      min-height: 100vh;
+      width: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .signup-box {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: min(360px, 100%);
+    }
+    .signup-box h2 {
+      text-align: center;
+      color: #2d572c;
+    }
+    input, select {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 10px;
+      margin: 7px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    .link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .link a {
+      color: #2d572c;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    #message {
+      min-height: 1.25em;
+      margin-top: 8px;
+    }
+    footer {
+      position: static;
+    }
+    .back {
+        width: 100%;
+        height: 100vh;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+      }
+    @media (max-width: 480px) {
+      .signup-box { padding: 20px; }
+    }
+  </style>
+<script src="/api-config.js"></script>
+</head>
+<body>
+  <header>
+    <div class="navbar">
+       <img src="assets/images/ac_logo.png" alt="agrichian logo" class="logo">
+      <h1>AgriChain</h1>
+      <h1></h1>
+    </div>
+  </header>
+  <section>
+    <img src="assets/images/image.png" alt="AgriChain Logo" class="back" />
+    <div class="signup-box">
+    <h2>Create Account</h2>
+    <form id="signupForm">
+      <input type="text" id="name" placeholder="Full Name" autocomplete="name" required />
+      <input type="email" id="email" placeholder="Email Address" autocomplete="email" required />
+      <input type="tel" id="phone" placeholder="Phone Number" autocomplete="tel" required />
+      <input type="text" id="location" placeholder="Location" autocomplete="address-level2" required />
+      <input type="password" id="password" placeholder="Password" minlength="8" autocomplete="new-password" required />
+      <select id="role" required>
+        <option value="farmer">Farmer</option>
+        <option value="buyer">Buyer</option>
+        <!-- <option value="admin">Admin</option> -->
+      </select>
+      <button type="submit">Sign Up</button>
+      <div id="message" aria-live="polite"></div>
+    </form>
+    <div class="link">
+      Already have an account? <a href="login.html">Login</a>
+    </div>
+  </div>
+  </section>
+  <footer>
+    <p>&copy; 2025 AgriChain. All rights reserved.</p>
+  </footer>
+</body>
+<script>
+    const form = document.getElementById('signupForm');
+    const messageDiv = document.getElementById('message');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        password: document.getElementById('password').value,
+        role: document.getElementById('role').value,
+        location: document.getElementById('location').value.trim()
+      };
+
+      submitButton.disabled = true;
+      let registrationSucceeded = false;
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user)
+        });
+
+        const result = await response.json();
+        messageDiv.textContent = result.message || (response.ok ? 'Account created.' : 'Registration failed.');
+        messageDiv.style.color = response.ok ? 'green' : 'red';
+        if (response.ok) {
+          registrationSucceeded = true;
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1000);
+        }
+      } catch (err) {
+        messageDiv.textContent = 'Network error. Please try again.';
+        messageDiv.style.color = 'red';
+        console.error(err);
+      } finally {
+        submitButton.disabled = registrationSucceeded;
+      }
+    });
+  </script>
+</html>
+

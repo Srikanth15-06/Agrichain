@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" type="image/x-icon" href="../assets/images/ac_logo.png">
+  <link rel="stylesheet" href="../style.css">
+  <title>Document</title>
+<script src="/api-config.js"></script>
+</head>
+<body>
+  <header>
+    <div class="navbar">
+      <img src="../assets/images/ac_logo.png" alt="agrichian logo" class="logo">
+      <h1>Welcome, <span id="userName"></span></h1>
+      <nav>
+        <a href="view_produce.html">Marketplace</a>
+        <a href="cart.html">Cart</a>
+        <a href="orders.html">Orders</a>
+        <a href="profile.html">Profile</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <section>
+    <img src="../assets/images/image.png" alt="AgriChain Logo" class="back" />
+    <div class="dashboard">
+      <div class="cart" id="cartItems">
+        <h2>Your Cart</h2>
+        <!-- Items will be injected here -->
+      </div>
+
+      <div style="padding: 20px;">
+        <p id="totalAmount"></p>
+        <p id="message"></p>
+        <button class="btn" onclick="upi()">UPI</button>
+        <button class="btn" onclick="checkout()">Card</button>
+        <button class="btn" onclick="cod()">Cash on Delivery</button>
+        <button class="btn" onclick="goHome()">Back to Home</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 AgriChain. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "../login.html";
+
+    const cartItemsDiv = document.getElementById("cartItems");
+    const totalAmountDiv = document.getElementById("totalAmount");
+    const message = document.getElementById("message");
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function renderCart() {
+      cartItemsDiv.innerHTML = "<h2>Your Cart</h2>";
+      let total = 0;
+
+      if (cart.length === 0) {
+        cartItemsDiv.innerHTML += "<p>Your cart is empty.</p>";
+        totalAmountDiv.textContent = "";
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        const quantity = Number(item.quantity);
+        const pricePerKg = Number(item.pricePerKg);
+        total += quantity * pricePerKg;
+        const div = document.createElement("div");
+        div.className = "cart-item";
+        const title = document.createElement("h3");
+        title.textContent = item.title;
+        const price = document.createElement("p");
+        price.textContent = `Price per Kg: INR ${pricePerKg}`;
+        const itemQuantity = document.createElement("p");
+        itemQuantity.textContent = `Quantity: ${quantity} Kg`;
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const subtotal = document.createElement("span");
+        subtotal.textContent = `Total: INR ${quantity * pricePerKg}`;
+        const removeButton = document.createElement("button");
+        removeButton.className = "btn";
+        removeButton.textContent = "Remove";
+        removeButton.addEventListener("click", () => removeItem(index));
+        actions.append(subtotal, removeButton);
+        div.append(title, price, itemQuantity, actions);
+        cartItemsDiv.appendChild(div);
+      });
+
+      totalAmountDiv.textContent = `Delivery Charges: INR 30 + Handling Fee: INR 20 | Total: INR ${total + 50}`;
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+    }
+
+    function goHome() {
+      window.location.href = "buyers_dashboard.html";
+    }
+
+    function upi() {
+      alert("UPI payment coming soon!");
+    }
+
+    function cod() {
+      alert("Cash on Delivery will be implemented soon!");
+    }
+
+    async function checkout() {
+      if (cart.length === 0) {
+        message.textContent = "Cart is empty.";
+        return;
+      }
+
+      if (cart.length !== 1) {
+        message.textContent = "Please check out one item at a time. Remove other items first.";
+        return;
+      }
+
+      const item = cart[0];
+      const produceId = item._id || item.produce || item.id;
+
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/payment/create-checkout-session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ produceId, quantity: item.quantity })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.url) {
+          throw new Error(data.message || "Failed to initiate payment");
+        }
+        window.location.href = data.url;
+      } catch (error) {
+        console.error("Checkout error:", error);
+        message.style.color = "red";
+        message.textContent = error.message || "Something went wrong. Try again.";
+      }
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>

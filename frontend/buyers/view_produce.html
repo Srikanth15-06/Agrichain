@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgriChain | Marketplace</title>
+  <link rel="shortcut icon" type="image/x-icon" href="../assets/images/ac_logo.png">
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    section {
+      padding: 180px 0;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      min-width: 200px;
+      margin: 5px;
+    }
+    .card img {
+      width: 90%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+    .dashboard {
+      padding: 30px 0 0;
+      margin: 240px 0 0;
+      background: rgba(218, 239, 214, 0.5);
+      border-radius: 8px;
+      height: 70vh;
+      width: 80%;
+      box-shadow: 0 2px 5px rgba(218, 239, 214, 0.9);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    nav { margin: 50px 0 0; }
+    section h2 { font-size: 30px; color: #2d572c; padding: 20px; }
+    section p { font-size: 18px; color: #555; }
+    .back {
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    .buy-btn, .cart-btn {
+      width: 150px;
+      margin: 10px;
+    }
+  </style>
+<script src="/api-config.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="navbar">
+      <img src="../assets/images/ac_logo.png" alt="AgriChain logo" class="logo">
+      <h1>Welcome, <span id="userName"></span></h1>
+      <nav><a href="#" id="logoutLink">Logout</a></nav>
+    </div>
+  </header>
+
+  <section>
+    <img src="../assets/images/image.png" alt="" class="back" />
+    <div class="dashboard">
+      <h2>🌾 Marketplace – Browse Produce</h2>
+      <div id="produceList" class="card-list"></div>
+      <div id="message" class="message" role="status"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 AgriChain. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const produceList = document.getElementById("produceList");
+    const messageBox = document.getElementById("message");
+    const apiBase = window.API_BASE_URL;
+
+    document.getElementById("logoutLink").addEventListener("click", event => {
+      event.preventDefault();
+      localStorage.removeItem("token");
+      window.location.href = "../login.html";
+    });
+
+    if (!token || role !== "buyer") {
+      sessionStorage.setItem("message", "Login required to access Marketplace");
+      window.location.href = "../login.html";
+    } else {
+      loadProduce();
+    }
+
+    async function loadProduce() {
+      try {
+        const response = await fetch(`${apiBase}/api/produce`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || "Could not load produce.");
+        }
+        if (!Array.isArray(data)) {
+          throw new Error("Unexpected produce response.");
+        }
+
+        const approvedProduce = data.filter(item => item.isApproved && !item.isRejected);
+        if (approvedProduce.length === 0) {
+          messageBox.textContent = "No produce available.";
+          return;
+        }
+
+        approvedProduce.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          if (item.image) {
+            const image = document.createElement("img");
+            image.src = window.resolveImageUrl(item.image);
+            image.alt = item.title || "Produce";
+            card.appendChild(image);
+          }
+
+          const title = document.createElement("h3");
+          title.textContent = item.title || "Produce";
+          card.appendChild(title);
+          addField(card, "Quantity", item.quantity);
+          addField(card, "INR/Kg", item.pricePerKg);
+          addField(card, "Location", item.location);
+          addField(card, "By", item.postedBy?.name || "Unknown");
+          addField(card, "Phone", item.postedBy?.phone || "Unknown");
+
+          const chatButton = document.createElement("button");
+          chatButton.className = "buy-btn";
+          chatButton.textContent = "Chat on WhatsApp";
+          chatButton.addEventListener("click", () => chatOnWhatsApp(item));
+          card.appendChild(chatButton);
+
+          const buyButton = document.createElement("button");
+          buyButton.className = "buy-btn";
+          buyButton.textContent = "Buy Now";
+          buyButton.addEventListener("click", () => buyNow(item._id));
+          card.appendChild(buyButton);
+
+          const cartButton = document.createElement("button");
+          cartButton.className = "cart-btn";
+          cartButton.textContent = "Add to Cart";
+          cartButton.addEventListener("click", () => addToCart(item));
+          card.appendChild(cartButton);
+
+          produceList.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Could not load marketplace:", error);
+        messageBox.textContent = error.message || "Error loading produce.";
+      }
+    }
+
+    function addField(card, label, value) {
+      const paragraph = document.createElement("p");
+      const strong = document.createElement("strong");
+      strong.textContent = `${label}: `;
+      paragraph.append(strong, document.createTextNode(value ?? "Unknown"));
+      card.appendChild(paragraph);
+    }
+
+    function chatOnWhatsApp(item) {
+      const phone = String(item.postedBy?.phone || "").replace(/\D/g, "");
+      if (phone.length < 10) {
+        alert("Seller's phone number is unavailable or invalid.");
+        return;
+      }
+      const text = `Hello, I'm interested in ${item.title || "your produce"}.`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+    }
+
+    function addToCart(item) {
+      const quantity = Number(prompt("Enter quantity (kg):"));
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        return;
+      }
+
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart.push({
+        _id: item._id,
+        title: item.title,
+        pricePerKg: item.pricePerKg,
+        quantity
+      });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      messageBox.textContent = `${item.title} added to cart`;
+    }
+
+    async function buyNow(produceId) {
+      const quantity = Number(prompt("Enter quantity to buy (kg):"));
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiBase}/api/payment/create-checkout-session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ produceId, quantity })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.url) {
+          throw new Error(data.message || "Payment initiation failed.");
+        }
+        window.location.href = data.url;
+      } catch (error) {
+        console.error("Checkout failed:", error);
+        messageBox.textContent = error.message || "Something went wrong.";
+      }
+    }
+  </script>
+</body>
+</html>

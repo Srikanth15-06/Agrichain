@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgriChain | Home</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+
+    section {
+      padding: 180px 0px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height:80vh;      
+
+      button{
+        background-color: #4CAF50;
+        color: white;
+        padding: 0px 0px;
+        border: none;
+        margin: 20px 0px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        max-width: 20vw;
+        width: 25vw
+      }
+    }
+    .lang-toggle {
+      margin-top: 10px;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 200px;
+      height:fit-content;
+      margin:5px;
+      padding:2px;
+    }
+    .dashboard {
+      padding: 30px 0px 0px 0px;
+      margin: 240px 0px 0px 0px;
+      background: rgba(218, 239, 214, 0.5);
+      border-radius: 8px;
+      height: 70vh;
+      width: 80%;
+      box-shadow: 0 2px 5px rgba(218, 239, 214, 0.9);
+      /* position: relative; */
+      scrollbar-width: thin;
+      overflow:scroll;
+      overflow-x: hidden;
+
+
+    }
+    nav {
+      margin:50px 0px 0px 0px;
+    }
+    section h2 {
+      font-size: 30px;
+      color: #2d572c;
+      padding: 20px;
+    }
+
+    section p {
+      font-size: 18px;
+      color: #555;
+    }
+
+    a{
+      text-decoration: none;
+      color: #2d572c;
+      border: 2px solid #2d572c;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+      margin: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      max-width: 15px;
+    }
+
+    section button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      margin: 50px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .back-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      margin: 20px 0px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      max-width: 30vw;
+      width: 30vw;
+    }
+
+    .back {
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    #notifications {
+      /* background: #fff3cd; */
+      padding: 50px 0px 0px 0px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+  </style>
+<script src="/api-config.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="navbar">
+        <img src="../assets/images/ac_logo.png" alt="agrichian logo" class="logo">
+      <h1>Welcome, <span id="userName"></span></h1>
+      <nav>
+        <!-- <label for="language">Language:</label>
+        <select id="language" class="lang-select">
+          <option value="en">English</option>
+          <option value="hi">हिंदी</option>
+        </select> -->
+      <a href="#" onclick="logout()">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <section>
+    <img src="../assets/images/image.png" alt="AgriChain Logo" class="back" />
+    <div class="dashboard">
+      <h2>product List</h2>
+      <div class="grid" id="produceList"></div>
+        <button class="back-btn" onclick="window.location.href='../index.html'">← Back to Home</button><br>
+        <button class="back-btn" onclick="window.location.href='admin_dashboard.html'">← Back to admin dashboard</button>
+        <div class="message" id="messageBox"></div>
+    </div>
+
+    <!-- <h1 data-key="welcome">Welcome, <span id="userName">Farmer</span></h1>
+    <button class="btn" data-key="postProduce">➕ Post Produce</button> -->
+  </section>
+
+  <footer>
+    <p>&copy; 2025 AgriChain. All rights reserved.</p>
+  </footer>
+
+    <!-- <script>
+    const token = localStorage.getItem("token"); // Or paste token manually
+
+    fetch(`${window.API_BASE_URL}/api/produce`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("produceList");
+
+      if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = "<p>No produce found.</p>";
+        return;
+      }
+
+      data.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          // <h3>${p.title}</h3>
+          // <p><strong>Quantity:</strong> ${p.quantity}</p>
+          // <p><strong>Price/Kg:</strong> ₹${p.pricePerKg}</p>
+          // <p><strong>Location:</strong> ${p.location}</p>
+          // <p><strong>Posted By:</strong> ${p.postedBy?.name || 'Unknown'}</p>
+          // <p><strong>Email:</strong> ${p.postedBy?.email || '-'}</p>
+        `;
+        container.appendChild(card);
+      });
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      document.getElementById("produceList").innerHTML = "<p>Failed to load produce.</p>";
+    });
+  </script> -->
+
+ <!-- <script>
+  const token = localStorage.getItem("token");
+
+  fetch(`${window.API_BASE_URL}/api/produce`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById("produceList");
+
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML = "<p>No produce found.</p>";
+      return;
+    }
+
+    data.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${p.title}</h3>
+        ${p.image ? `<img src="${window.resolveImageUrl(p.image)}" style="max-width:150px;border-radius:15px;" alt="${p.title}" />` : '<em>No image</em>'}
+        <p><strong>Quantity:</strong> ${p.quantity}</p>
+        <p><strong>Price/Kg:</strong> ₹${p.pricePerKg}</p>
+        <p><strong>Location:</strong> ${p.location}</p>
+        <p><strong>Posted By:</strong> ${p.postedBy?.name || 'Unknown'}</p>
+        <p><strong>Email:</strong> ${p.postedBy?.email || '-'}</p>
+        <p><strong>Status:</strong> ${p.isApproved ? "✅ Approved" : p.isRejected ? "❌ Rejected" : "⏳ Pending"}</p>
+        ${p.rejectionReason ? `<p><strong>Reason:</strong> ${p.rejectionReason}</p>` : ""}
+        ${(!p.isApproved && !p.isRejected) ? `
+          <button onclick="approveProduce('${p._id}')">✅ Approve</button>
+          <button onclick="rejectProduce('${p._id}')">❌ Reject</button>
+        ` : ""}
+      `;
+      container.appendChild(card);
+    });
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    document.getElementById("produceList").innerHTML = "<p>Failed to load produce.</p>";
+  });
+
+  function approveProduce(id) {
+    const token = localStorage.getItem("token");
+    fetch(`${window.API_BASE_URL}/api/produce/admin/update/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        isApproved: true,
+        isRejected: false,
+        rejectionReason: ""
+      })
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => alert("Approval failed"));
+  }
+
+  function rejectProduce(id) {
+    const reason = prompt("Enter rejection reason:");
+    if (!reason) return;
+
+    const token = localStorage.getItem("token");
+    fetch(`${window.API_BASE_URL}/api/produce/admin/update/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        isApproved: false,
+        isRejected: true,
+        rejectionReason: reason
+      })
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => alert("Rejection failed"));
+  }
+</script> -->
+
+<script>
+  const token = localStorage.getItem("token");
+
+  fetch(`${window.API_BASE_URL}/api/user/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Failed to load profile");
+    return res.json();
+  })
+  .then(profile => {
+    document.getElementById("userName").textContent = profile.name || "";
+  })
+  .catch(error => console.error("Error loading profile:", error));
+
+  fetch(`${window.API_BASE_URL}/api/produce`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById("produceList");
+
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML = "<p>No produce found.</p>";
+      return;
+    }
+
+    data.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${p.title}</h3>
+        ${p.image ? `<img src="${window.resolveImageUrl(p.image)}" style="max-width:150px;border-radius:15px;" alt="${p.title}" />` : '<em>No image</em>'}
+        <p><strong>Quantity:</strong> ${p.quantity}</p>
+        <p><strong>Price/Kg:</strong> ₹${p.pricePerKg}</p>
+        <p><strong>Location:</strong> ${p.location}</p>
+        <p><strong>Posted By:</strong> ${p.postedBy?.name || 'Unknown'}</p>
+        <p><strong>Email:</strong> ${p.postedBy?.email || '-'}</p>
+        <p><strong>Status:</strong> ${p.isApproved ? "✅ Approved" : p.isRejected ? "❌ Rejected" : "⏳ Pending"}</p>
+        ${p.rejectionReason ? `<p><strong>Reason:</strong> ${p.rejectionReason}</p>` : ""}
+        <div style="margin-top:10px;">
+          ${(!p.isApproved && !p.isRejected) ? `
+            <button onclick="approveProduce('${p._id}')">✅ Approve</button>
+            <button onclick="rejectProduce('${p._id}')">❌ Reject</button>
+          ` : ""}
+          <button onclick="deleteProduce('${p._id}')" style="background-color:red;color:white;">🗑️ Remove</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    document.getElementById("produceList").innerHTML = "<p>Failed to load produce.</p>";
+  });
+
+  function approveProduce(id) {
+    const token = localStorage.getItem("token");
+    fetch(`${window.API_BASE_URL}/api/produce/admin/update/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        isApproved: true,
+        isRejected: false,
+        rejectionReason: ""
+      })
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => alert("Approval failed"));
+  }
+
+  function rejectProduce(id) {
+    const reason = prompt("Enter rejection reason:");
+    if (!reason) return;
+
+    const token = localStorage.getItem("token");
+    fetch(`${window.API_BASE_URL}/api/produce/admin/update/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        isApproved: false,
+        isRejected: true,
+        rejectionReason: reason
+      })
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => alert("Rejection failed"));
+  }
+
+  function deleteProduce(id) {
+    if (!confirm("Are you sure you want to delete this produce?")) return;
+
+    const token = localStorage.getItem("token");
+    fetch(`${window.API_BASE_URL}/api/produce/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(res => {
+      if (res.ok) {
+        alert("Produce deleted.");
+        location.reload();
+      } else {
+        alert("Failed to delete.");
+      }
+    })
+    .catch(err => alert("Delete error"));
+  }
+
+    // Logout
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "../login.html";
+  }
+
+</script>
+
+
+</body>
+</html>
+
